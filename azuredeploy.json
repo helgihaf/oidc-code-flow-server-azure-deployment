@@ -1,209 +1,228 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "siteName": {
-      "type": "string"
-    },
-    "hostingPlanName": {
-      "type": "string"
-    },
-    "siteLocation": {
-      "type": "string"
-    },
-    "sku": {
-      "type": "string",
-      "allowedValues": ["Free", "Shared", "Basic", "Standard", "Premium"],
-      "defaultValue": "Free"
-    },
-    "skuCode": {
-      "type": "string",
-      "allowedValues": [
-        "D1",
-        "F1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P1V2",
-        "P2V2",
-        "P3V2",
-        "I1",
-        "I2",
-        "I3",
-        "Y1"
-      ],
-      "defaultValue": "F1"
-    },
-    "workerSize": {
-      "type": "string",
-      "allowedValues": ["0", "1", "2"],
-      "defaultValue": "0"
-    },
-    "repoUrl": {
-      "type": "string"
-    },
-    "branch": {
-      "type": "string",
-      "defaultValue": "master"
-    },
-    "relativeCallbackEndpoint": {
-      "type": "string",
-      "defaultValue": "authenticate"
-    },
-    "relativeRefreshEndpoint": {
-      "type": "string",
-      "defaultValue": "refresh"
-    },
-    "tokenEndpoint": {
-      "type": "string",
-      "defaultValue": "https://authsandbox.landsbankinn.is/as/token.oauth2"
-    },
-    "clientId": {
-      "type": "string"
-    },
-    "clientSecret": {
-      "type": "string"
-    },
-    "validateAccessToken": {
-      "type": "string",
-      "allowedValues": ["true", "false"],
-      "defaultValue": "true"
-    },
-    "validateIdToken": {
-      "type": "string",
-      "allowedValues": ["true", "false"],
-      "defaultValue": "true"
-    },
-    "issuer": {
-      "type": "string",
-      "defaultValue": "https://authsandbox.landsbankinn.is"
-    },
-    "audience": {
-      "type": "string",
-      "defaultValue": "https://apisandbox.landsbankinn.is"
-    },
-    "accessTokenJwksEndpoint": {
-      "type": "string",
-      "defaultValue": "https://authsandbox.landsbankinn.is/ext/oauth/jwks"
-    },
-    "idTokenJwksEndpoint": {
-      "type": "string",
-      "defaultValue": "https://authsandbox.landsbankinn.is/pf/JWKS"
-    },
-    "useAuthorizationOnRefreshEndpoint": {
-      "type": "string",
-      "allowedValues": ["true", "false"],
-      "defaultValue": "false"
-    },
-    "username": {
-      "type": "string",
-      "defaultValue": "*"
-    },
-    "password": {
-      "type": "string",
-      "defaultValue": "*"
-    },
-    "allowedCORSHeaders": {
-      "type": "string",
-      "defaultValue": "*"
-    },
-    "allowedCORSOrigins": {
-      "type": "string"
-    },
-    "logLevel": {
-      "type": "string",
-      "defaultValue": "Warning"
-    }
-  },
-  "variables": {
-    "apiSiteName": "[concat(parameters('siteName'), 'Api')]"
-  },
-  "resources": [
-    {
-      "apiVersion": "2018-11-01",
-      "name": "[parameters('hostingPlanName')]",
-      "type": "Microsoft.Web/serverFarms",
-      "location": "[parameters('siteLocation')]",
-      "sku": {
-        "name": "[parameters('skuCode')]",
-        "tier": "[parameters('sku')]"
-      },
-      "properties": {
-        "name": "[parameters('hostingPlanName')]",
-        "workerSize": "[parameters('workerSize')]",
-        "numberOfWorkers": 1
-      }
-    },
-    {
-      "apiVersion": "2018-11-01",
-      "name": "[parameters('siteName')]",
-      "type": "Microsoft.Web/sites",
-      "location": "[parameters('siteLocation')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms', parameters('hostingPlanName'))]"
-      ],
-      "properties": {
-        "serverFarmId": "[parameters('hostingPlanName')]"
-      },
-      "resources": [
-        {
-          "apiVersion": "2018-11-01",
-          "name": "appsettings",
-          "type": "config",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
-          ],
-          "properties": {
-            "PROJECT": "src\\OidcCodeFlowServerWeb\\OidcCodeFlowServerWeb.csproj",
-            "Auth:RelativeCallbackEndpoint": "[parameters('relativeCallbackEndpoint')]",
-            "Auth:RelativeRefreshEndpoint": "[parameters('relativeRefreshEndpoint')]",
-            "Auth:Issuer": "[parameters('issuer')]",
-            "Auth:Audience": "[parameters('audience')]",
-            "Auth:TokenEndpoint": "[parameters('tokenEndpoint')]",
-            "Auth:AccessTokenJwksEndpoint": "[parameters('accessTokenJwksEndpoint')]",
-            "Auth:IdTokenJwksEndpoint": "[parameters('idTokenJwksEndpoint')]",
-            "Auth:Username": "[parameters('username')]",
-            "Auth:Password": "[parameters('password')]",
-            "Auth:ClientId": "[parameters('clientId')]",
-            "Auth:ClientSecret": "[parameters('clientSecret')]",
-            "Auth:AllowedCORSHeaders": "[parameters('allowedCORSHeaders')]",
-            "Auth:AllowedCORSOrigins": "[parameters('allowedCORSOrigins')]",
-            "Auth:ValidateAccessToken": "[parameters('validateAccessToken')]",
-            "Auth:ValidateIdToken": "[parameters('validateIdToken')]",
-            "Auth:UseAuthorizationOnRefreshEndpoint": "[parameters('useAuthorizationOnRefreshEndpoint')]",
-            "Logging:LogLevel:Default": "[parameters('logLevel')]"
-          }
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "siteName": {
+            "type": "string"
         },
-        {
-          "apiVersion": "2018-11-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
-            "[resourceId('Microsoft.Web/Sites/config', parameters('siteName'), 'appsettings')]"
-          ],
-          "properties": {
-            "RepoUrl": "[parameters('repoUrl')]",
-            "branch": "[parameters('branch')]",
-            "IsManualIntegration": true
-          }
+        "hostingPlanName": {
+            "type": "string"
         },
-        {
-          "apiVersion": "2018-11-01",
-          "name": "Microsoft.AspNetCore.AzureAppServices.SiteExtension",
-          "type": "siteextensions",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
-          ],
-          "properties": {}
+        "siteLocation": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+                "Free",
+                "Shared",
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "defaultValue": "Free"
+        },
+        "skuCode": {
+            "type": "string",
+            "allowedValues": [
+                "D1",
+                "F1",
+                "B1",
+                "B2",
+                "B3",
+                "S1",
+                "S2",
+                "S3",
+                "P1",
+                "P2",
+                "P3",
+                "P1V2",
+                "P2V2",
+                "P3V2",
+                "I1",
+                "I2",
+                "I3",
+                "Y1"
+            ],
+            "defaultValue": "F1"
+        },
+        "workerSize": {
+            "type": "string",
+            "allowedValues": [
+                "0",
+                "1",
+                "2"
+            ],
+            "defaultValue": "0"
+        },
+        "repoUrl": {
+            "type": "string"
+        },
+        "branch": {
+            "type": "string",
+            "defaultValue": "master"
+        },
+        "relativeCallbackEndpoint": {
+            "type": "string",
+            "defaultValue": "authenticate"
+        },
+        "relativeRefreshEndpoint": {
+            "type": "string",
+            "defaultValue": "refresh"
+        },
+        "tokenEndpoint": {
+            "type": "string",
+            "defaultValue": "https://authsandbox.landsbankinn.is/as/token.oauth2"
+        },
+        "clientId": {
+            "type": "string"
+        },
+        "clientSecret": {
+            "type": "string"
+        },
+        "validateAccessToken": {
+            "type": "string",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "defaultValue": "true"
+        },
+        "validateIdToken": {
+            "type": "string",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "defaultValue": "true"
+        },
+        "issuer": {
+            "type": "string",
+            "defaultValue": "https://authsandbox.landsbankinn.is"
+        },
+        "audience": {
+            "type": "string",
+            "defaultValue": "https://apisandbox.landsbankinn.is"
+        },
+        "accessTokenJwksEndpoint": {
+            "type": "string",
+            "defaultValue": "https://authsandbox.landsbankinn.is/ext/oauth/jwks"
+        },
+        "idTokenJwksEndpoint": {
+            "type": "string",
+            "defaultValue": "https://authsandbox.landsbankinn.is/pf/JWKS"
+        },
+        "useAuthorizationOnRefreshEndpoint": {
+            "type": "string",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "defaultValue": "false"
+        },
+        "username": {
+            "type": "string",
+            "defaultValue": "*"
+        },
+        "password": {
+            "type": "string",
+            "defaultValue": "*"
+        },
+        "allowedCORSHeaders": {
+            "type": "string",
+            "defaultValue": "*"
+        },
+        "allowedCORSOrigins": {
+            "type": "string"
+        },
+        "logLevel": {
+            "type": "string",
+            "defaultValue": "Warning"
         }
-      ]
-    }
-  ]
+    },
+    "variables": {
+        "apiSiteName": "[concat(parameters('siteName'), 'Api')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('hostingPlanName')]",
+            "type": "Microsoft.Web/serverFarms",
+            "location": "[parameters('siteLocation')]",
+            "sku": {
+                "name": "[parameters('skuCode')]",
+                "tier": "[parameters('sku')]"
+            },
+            "properties": {
+                "name": "[parameters('hostingPlanName')]",
+                "workerSize": "[parameters('workerSize')]",
+                "numberOfWorkers": 1
+            }
+        },
+        {
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('siteName')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('siteLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverFarms', parameters('hostingPlanName'))]"
+            ],
+            "properties": {
+                "serverFarmId": "[parameters('hostingPlanName')]"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-11-01",
+                    "name": "appsettings",
+                    "type": "config",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+                    ],
+                    "properties": {
+                        "PROJECT": "src\\OidcCodeFlowServerWeb\\OidcCodeFlowServerWeb.csproj",
+                        "Auth:RelativeCallbackEndpoint": "[parameters('relativeCallbackEndpoint')]",
+                        "Auth:RelativeRefreshEndpoint": "[parameters('relativeRefreshEndpoint')]",
+                        "Auth:Issuer": "[parameters('issuer')]",
+                        "Auth:Audience": "[parameters('audience')]",
+                        "Auth:TokenEndpoint": "[parameters('tokenEndpoint')]",
+                        "Auth:AccessTokenJwksEndpoint": "[parameters('accessTokenJwksEndpoint')]",
+                        "Auth:IdTokenJwksEndpoint": "[parameters('idTokenJwksEndpoint')]",
+                        "Auth:Username": "[parameters('username')]",
+                        "Auth:Password": "[parameters('password')]",
+                        "Auth:ClientId": "[parameters('clientId')]",
+                        "Auth:ClientSecret": "[parameters('clientSecret')]",
+                        "Auth:AllowedCORSHeaders": "[parameters('allowedCORSHeaders')]",
+                        "Auth:AllowedCORSOrigins": "[parameters('allowedCORSOrigins')]",
+                        "Auth:ValidateAccessToken": "[parameters('validateAccessToken')]",
+                        "Auth:ValidateIdToken": "[parameters('validateIdToken')]",
+                        "Auth:UseAuthorizationOnRefreshEndpoint": "[parameters('useAuthorizationOnRefreshEndpoint')]",
+                        "Logging:LogLevel:Default": "[parameters('logLevel')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-11-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
+                        "[resourceId('Microsoft.Web/Sites/config', parameters('siteName'), 'appsettings')]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[parameters('repoUrl')]",
+                        "branch": "[parameters('branch')]",
+                        "IsManualIntegration": true
+                    }
+                },
+                {
+                    "apiVersion": "2018-11-01",
+                    "name": "Microsoft.AspNetCore.AzureAppServices.SiteExtension",
+                    "type": "siteextensions",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+                    ],
+                    "properties": {}
+                }
+            ]
+        }
+    ]
 }
